@@ -4,12 +4,15 @@ import axios from 'axios';
 
 function SupervisorDashboard() {
     const [groups, setGroups] = useState([]);
+    const [maxGroups, setMaxGroups] = useState(5);
+    const [showPreferences, setShowPreferences] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchGroups = async () => {
+        const fetchData = async () => {
             const token = localStorage.getItem('token');
             if (!token) {
                 navigate('/supervisor/login');
@@ -17,10 +20,17 @@ function SupervisorDashboard() {
             }
 
             try {
+                // Fetch groups
                 const res = await axios.get('http://localhost:5000/api/my-groups', {
                     headers: { 'x-auth-token': token }
                 });
                 setGroups(res.data);
+                
+                // Fetch preferences
+                const prefRes = await axios.get('http://localhost:5000/api/supervisors/preferences', {
+                    headers: { 'x-auth-token': token }
+                });
+                setMaxGroups(prefRes.data.max_groups);
             } catch (err) {
                 console.error("Error fetching groups:", err);
                 setError('Failed to load dashboard data. Please log in again.');
@@ -30,8 +40,24 @@ function SupervisorDashboard() {
             }
         };
 
-        fetchGroups();
+        fetchData();
     }, [navigate]);
+
+    const handlePreferencesUpdate = async () => {
+        const token = localStorage.getItem('token');
+        try {
+            await axios.put('http://localhost:5000/api/supervisors/preferences', 
+                { max_groups: maxGroups },
+                { headers: { 'x-auth-token': token } }
+            );
+            setSuccess('Preferences updated successfully!');
+            setShowPreferences(false);
+            setTimeout(() => setSuccess(''), 3000);
+        } catch (err) {
+            console.error('Failed to update preferences:', err);
+            setError('Failed to update preferences. Please try again.');
+        }
+    };
 
     const handleMarkUpdate = async (student_reg_no, group_id, review_number, marks) => {
         const payload = {
@@ -65,13 +91,60 @@ function SupervisorDashboard() {
     
     return (
         <div>
-            <h1 className="text-3xl font-bold mb-6">Supervisor Dashboard</h1>
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-3xl font-bold">Supervisor Dashboard</h1>
+                <button
+                    onClick={() => setShowPreferences(!showPreferences)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                >
+                    Group Preferences
+                </button>
+            </div>
+            
+            {/* Preferences Panel */}
+            {showPreferences && (
+                <div className="bg-blue-50 p-6 rounded-lg shadow-md mb-6">
+                    <h3 className="text-lg font-semibold mb-4">Set Maximum Groups</h3>
+                    <div className="flex items-center space-x-4">
+                        <label className="text-sm font-medium">Maximum groups you want to supervise:</label>
+                        <input
+                            type="number"
+                            min="1"
+                            max="20"
+                            value={maxGroups}
+                            onChange={(e) => setMaxGroups(parseInt(e.target.value))}
+                            className="w-20 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        />
+                        <button
+                            onClick={handlePreferencesUpdate}
+                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition-colors"
+                        >
+                            Update
+                        </button>
+                        <button
+                            onClick={() => setShowPreferences(false)}
+                            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md transition-colors"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                    <p className="text-sm text-gray-600 mt-2">
+                        Currently assigned: {groups.length} groups | Maximum: {maxGroups} groups
+                    </p>
+                </div>
+            )}
             
             {/* Display error message if it exists */}
             {error && <p className="text-center text-red-500 bg-red-100 p-3 rounded-md mb-4">{error}</p>}
+            {success && <p className="text-center text-green-500 bg-green-100 p-3 rounded-md mb-4">{success}</p>}
 
             {groups.length === 0 ? (
-                <p>No groups have been assigned to you yet.</p>
+                <div className="text-center py-8">
+                    <p className="text-gray-600 mb-4">No groups have been assigned to you yet.</p>
+                    <p className="text-sm text-gray-500">
+                        Groups will be automatically assigned by the admin based on your preferences.
+                    </p>
+                </div>
             ) : (
                 <div className="space-y-8">
                     {groups.map((group, groupIndex) => (

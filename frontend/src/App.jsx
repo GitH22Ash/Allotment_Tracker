@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import GroupRegistration from './components/GroupRegistration';
 import SupervisorLogin from './components/SupervisorLogin';
 import SupervisorDashboard from './components/SupervisorDashboard';
+import AdminPanel from './components/AdminPanel';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
               <div className="flex items-center space-x-4">
                 <Link to="/" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors">Register Group</Link>
                 <Link to="/supervisor/login" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors">Supervisor Login</Link>
+                <Link to="/admin" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors">Admin Panel</Link>
               </div>
             </div>
           </nav>
@@ -26,6 +28,7 @@ function App() {
               <Route path="/" element={<GroupRegistration />} />
               <Route path="/supervisor/login" element={<SupervisorLogin />} />
               <Route path="/supervisor/dashboard" element={<SupervisorDashboard />} />
+              <Route path="/admin" element={<AdminPanel />} />
             </Routes>
           </main>
         </div>

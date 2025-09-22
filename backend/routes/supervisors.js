@@ -5,6 +5,52 @@ const jwt = require('jsonwebtoken');
 const db = require('../db');
 const auth = require('../middleware/auth');
 
+// @route   PUT api/supervisors/preferences
+// @desc    Update supervisor's group preference
+// @access  Private
+router.put('/preferences', auth, async (req, res) => {
+    const { max_groups } = req.body;
+    const supervisorId = req.supervisor.id;
+
+    if (!max_groups || max_groups < 1) {
+        return res.status(400).json({ msg: 'Please specify a valid number of groups (minimum 1)' });
+    }
+
+    try {
+        await db.query(
+            'UPDATE supervisors SET max_groups = $1 WHERE emp_id = $2',
+            [max_groups, supervisorId]
+        );
+        res.json({ msg: 'Preferences updated successfully' });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   GET api/supervisors/preferences
+// @desc    Get supervisor's current preferences
+// @access  Private
+router.get('/preferences', auth, async (req, res) => {
+    const supervisorId = req.supervisor.id;
+
+    try {
+        const result = await db.query(
+            'SELECT max_groups FROM supervisors WHERE emp_id = $1',
+            [supervisorId]
+        );
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ msg: 'Supervisor not found' });
+        }
+
+        res.json({ max_groups: result.rows[0].max_groups || 5 }); // Default to 5 if not set
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
 // @route   POST api/supervisors/register
 // @desc    Register a new supervisor
 // @access  Public
