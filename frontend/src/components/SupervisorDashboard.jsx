@@ -18,7 +18,7 @@ function SupervisorDashboard() {
 
             try {
                 const res = await axios.get('http://localhost:5000/api/my-groups', {
-                    headers: { Authorization: `Bearer ${token}` }
+                    headers: { 'x-auth-token': token }
                 });
                 setGroups(res.data);
             } catch (err) {
@@ -43,8 +43,8 @@ function SupervisorDashboard() {
 
         try {
             const token = localStorage.getItem('token');
-            await axios.put('http://localhost:5000/api/marks', payload, {
-                headers: { Authorization: `Bearer ${token}` }
+            await axios.put('http://localhost:5000/api/supervisors/marks', payload, {
+                headers: { 'x-auth-token': token }
             });
              // Clear any previous error on a successful update
             setError('');
