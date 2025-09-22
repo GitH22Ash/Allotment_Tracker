@@ -48,8 +48,9 @@ function GroupRegistration() {
             setGroupName("");
             setMembers(Array(5).fill(null).map(() => ({ ...initialMemberState })));
         } catch (err) {
+            console.error("Full error object:", err);
+            console.error("Error response:", err.response);
             setError(err.response?.data?.msg || "An error occurred during registration.");
-            console.error(err);
         }
     };
 

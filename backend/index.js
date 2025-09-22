@@ -1,25 +1,33 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const app = express();
+const db = require('./db'); // Ensure db is imported to initialize the pool
 
-// Import routes
-const groupRoutes = require('./routes/groups');
-const adminRoutes = require('./routes/admin');
-const supervisorRoutes = require('./routes/supervisors');
+const app = express();
+const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
-app.use(express.json()); // To parse JSON bodies
+app.use(express.json()); // This allows the server to accept JSON in the request body
 
-// Define API routes
-app.use('/api/groups', groupRoutes);
-app.use('/api/admin', adminRoutes);
+// --- API Routes ---
+// Import route files
+const groupRoutes = require('./routes/groups');
+const supervisorRoutes = require('./routes/supervisors');
+const adminRoutes = require('./routes/admin');
+
+// Use the routes
+// Any request starting with /api/groups will be handled by groupRoutes
+app.use('/api/groups', groupRoutes); 
+
+// Any request starting with /api/supervisors will be handled by supervisorRoutes
 app.use('/api/supervisors', supervisorRoutes);
 
-// Define the port
-const PORT = process.env.PORT || 5000;
+// Any request starting with /api/admin will be handled by adminRoutes
+app.use('/api/admin', adminRoutes);
+ 
 
-// Start the server
-app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+app.listen(PORT, () => {
+    console.log(`Server started on port ${PORT}`);
+});
 

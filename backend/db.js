@@ -18,4 +18,5 @@ console.log("Database connection pool successfully initialized.");
 
 module.exports = {
     query: (text, params) => pool.query(text, params),
+    pool: pool,
 };

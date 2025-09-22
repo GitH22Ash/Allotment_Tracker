@@ -9,7 +9,9 @@ const auth = require('../middleware/auth');
 // @desc    Register a new supervisor
 // @access  Public
 router.post('/register', async (req, res) => {
+    // console.log(req.body);
     const { emp_id, name, email, password } = req.body;
+    
 
     // Simple validation
     if (!emp_id || !name || !email || !password) {
@@ -36,7 +38,6 @@ router.post('/register', async (req, res) => {
             "INSERT INTO supervisors (emp_id, name, email, password_hash) VALUES ($1, $2, $3, $4) RETURNING emp_id, name, email",
             [emp_id, name, email, password_hash]
         );
-
         res.status(201).json({
             msg: "Supervisor registered successfully!",
             supervisor: newSupervisor.rows[0]
