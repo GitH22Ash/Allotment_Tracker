@@ -28,25 +28,26 @@ function AdminPanel() {
             fetchGroups();
         }
     }, [activeTab]);
-
-    const fetchSupervisors = async () => {
+   const fetchSupervisors = async () => {
         try {
             setLoading(true);
             const response = await axios.get(`${API_URL}/admin/supervisors`);
             setSupervisors(response.data);
         } catch (err) {
+            console.error("Error fetching supervisors:", err);
             setError('Failed to fetch supervisors');
         } finally {
             setLoading(false);
         }
     };
 
-    const fetchGroups = async () => {
+     const fetchGroups = async () => {
         try {
             setLoading(true);
             const response = await axios.get(`${API_URL}/admin/groups`);
             setGroups(response.data);
         } catch (err) {
+            console.error("Error fetching groups:", err);
             setError('Failed to fetch groups');
         } finally {
             setLoading(false);
@@ -144,13 +145,13 @@ function AdminPanel() {
         }
     };
 
-    const TabButton = ({ tabKey, label, isActive, onClick }) => (
+     const TabButton = ({ tabKey, label }) => (
         <button
-            onClick={onClick}
-            className={`px-4 py-2 font-medium rounded-t-lg transition-colors ${
-                isActive 
-                    ? 'bg-blue-600 text-white border-b-2 border-blue-600' 
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            onClick={() => setActiveTab(tabKey)}
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                activeTab === tabKey
+                    ? 'bg-blue-600 text-white' 
+                    : 'text-gray-300 hover:bg-gray-700'
             }`}
         >
             {label}
