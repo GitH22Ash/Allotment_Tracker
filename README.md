@@ -38,6 +38,7 @@ This system replaces the manual, paper-based workflow with an **efficient digita
  ┃ ┣ 📂 routes
  ┃ ┣ 📜 db.js
  ┃ ┣ 📜 index.js
+ ┃ ┣ 📜 db_schema.sql
  ┃ ┣ 📜 package.json
  ┃ ┣ 📜 package-lock.json
  ┃ ┣ 📜 .gitignore
@@ -98,7 +99,9 @@ JWT_SECRET="a_very_strong_and_secret_key_that_you_should_change"
 ```
 
 > ⚠️ Replace `[YOUR-PASSWORD]` with your actual database password.  
-> ⚠️To generate a strong JWT secret, you can use python's `python -c "import secrets; print(secrets.token_hex(32))"` command in your terminal. 
+> ⚠️To generate a strong JWT secret, you can use the folowing python command in your terminal. 
+>`python -c "import secrets; print(secrets.token_hex(32))"` 
+
 
 Run database schema in Supabase SQL Editor using `db_schema.sql` present in the backend folder.  
 
