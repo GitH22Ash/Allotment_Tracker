@@ -20,8 +20,8 @@ function SupervisorDashboard() {
             }
 
             try {
-                // Fetch groups
-                const res = await axios.get('http://localhost:5000/api/my-groups', {
+                // Fetch groups - CORRECTED ENDPOINT
+                const res = await axios.get('http://localhost:5000/api/supervisors/my-groups', {
                     headers: { 'x-auth-token': token }
                 });
                 setGroups(res.data);
@@ -142,7 +142,7 @@ function SupervisorDashboard() {
                 <div className="text-center py-8">
                     <p className="text-gray-600 mb-4">No groups have been assigned to you yet.</p>
                     <p className="text-sm text-gray-500">
-                        Groups will be automatically assigned by the admin based on your preferences.
+                        Check back later after the admin has assigned groups.
                     </p>
                 </div>
             ) : (
