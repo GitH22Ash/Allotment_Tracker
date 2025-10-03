@@ -98,6 +98,7 @@ JWT_SECRET="a_very_strong_and_secret_key_that_you_should_change"
 ```
 
 > ⚠️ Replace `[YOUR-PASSWORD]` with your actual database password.  
+> ⚠️To generate a strong JWT secret, you can use python's `python -c "import secrets; print(secrets.token_hex(32))"` command in your terminal. 
 
 Run database schema in Supabase SQL Editor using `db_schema.sql` present in the backend folder.  
 
@@ -138,7 +139,7 @@ Open your browser and go to **http://localhost:5173** to start using the applica
 ### 🎥 Admin Panel  
 <img src="./assets/admin_panel.png" width="600" />
 
-### 🎥 Admin Panel  
+### 🎥 DB Schema  
 <img src="./assets/db_er.jpg" width="600" />
 
 ---
