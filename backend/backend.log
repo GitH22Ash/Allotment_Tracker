@@ -1,0 +1,5 @@
+[dotenv@17.2.2] injecting env (2) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+[dotenv@17.2.2] injecting env (0) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+DATABASE_URL found. Initializing connection pool...
+Database connection pool successfully initialized.
+Server started on port 5000

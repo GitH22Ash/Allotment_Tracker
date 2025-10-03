@@ -8,15 +8,15 @@ const bcrypt = require('bcryptjs');
 router.get('/supervisors', async (req, res) => {
     try {
         const query = `
-            SELECT 
-                s.emp_id, 
-                s.name, 
+            SELECT
+                s.emp_id,
+                s.name,
                 s.email,
-                COALESCE(s.max_groups, 5) as max_groups,
+                5 as max_groups,
                 COUNT(pg.group_id) as current_groups
             FROM supervisors s
             LEFT JOIN project_groups pg ON s.emp_id = pg.assigned_supervisor_id
-            GROUP BY s.emp_id, s.name, s.email, s.max_groups
+            GROUP BY s.emp_id, s.name, s.email
             ORDER BY s.name
         `;
         const result = await db.query(query);
@@ -61,14 +61,14 @@ router.put('/groups/:groupId/assign', async (req, res) => {
     try {
         // Check if supervisor exists and get their current group count
         const supervisorCheck = await db.query(`
-            SELECT 
-                s.emp_id, 
-                COALESCE(s.max_groups, 5) as max_groups,
+            SELECT
+                s.emp_id,
+                5 as max_groups,
                 COUNT(pg.group_id) as current_groups
             FROM supervisors s
             LEFT JOIN project_groups pg ON s.emp_id = pg.assigned_supervisor_id
             WHERE s.emp_id = $1
-            GROUP BY s.emp_id, s.max_groups
+            GROUP BY s.emp_id
         `, [supervisorId]);
 
         if (supervisorCheck.rows.length === 0) {
@@ -77,8 +77,8 @@ router.put('/groups/:groupId/assign', async (req, res) => {
 
         const supervisor = supervisorCheck.rows[0];
         if (supervisor.current_groups >= supervisor.max_groups) {
-            return res.status(400).json({ 
-                msg: `Supervisor has reached maximum capacity (${supervisor.max_groups} groups)` 
+            return res.status(400).json({
+                msg: `Supervisor has reached maximum capacity (${supervisor.max_groups} groups)`
             });
         }
 
@@ -148,13 +148,13 @@ router.post('/assign-groups', async (req, res) => {
         
         // Step 2: Fetch all available supervisors with their preferences and current group counts.
         const supervisorsRes = await db.query(`
-            SELECT 
-                s.emp_id, 
-                COALESCE(s.max_groups, 5) as max_groups,
+            SELECT
+                s.emp_id,
+                5 as max_groups,
                 COUNT(pg.group_id) as current_groups
             FROM supervisors s
             LEFT JOIN project_groups pg ON s.emp_id = pg.assigned_supervisor_id
-            GROUP BY s.emp_id, s.max_groups
+            GROUP BY s.emp_id
         `);
         
         let groups = groupsRes.rows;
