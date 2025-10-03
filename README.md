@@ -99,7 +99,7 @@ JWT_SECRET="a_very_strong_and_secret_key_that_you_should_change"
 
 > ⚠️ Replace `[YOUR-PASSWORD]` with your actual database password.  
 
-Run database schema in Supabase SQL Editor using `db_schema.sql`.  
+Run database schema in Supabase SQL Editor using `db_schema.sql` present in the backend folder.  
 
 Start the backend server:  
 ```bash
@@ -130,12 +130,15 @@ Open your browser and go to **http://localhost:5173** to start using the applica
 ## 📸 Screenshots  
 
 ### 🔐 Student Group Registration  
-<img src="./assets/register_grp.png" width="500" />
+<img src="./assets/register_grp.png" width="600" />
 
 ### 📊 Supervisor Login  
 <img src="./assets/supervisor_login.png" width="600" />
 
 ### 🎥 Admin Panel  
-<img src="./assets/admin_panel.png" width="700" />
+<img src="./assets/admin_panel.png" width="600" />
+
+### 🎥 Admin Panel  
+<img src="./assets/db_er.jpg" width="600" />
 
 ---
