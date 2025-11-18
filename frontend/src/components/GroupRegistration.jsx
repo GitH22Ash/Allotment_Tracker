@@ -1,7 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
-
-const API_URL = "http://localhost:5000/api";
+import { API } from "../api"; // adjust path if this component is in a different folder
 
 const initialMemberState = { name: "", reg_no: "", cgpa: "" };
 
@@ -12,6 +10,7 @@ function GroupRegistration() {
     );
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const handleMemberChange = (index, field, value) => {
         // Create a new array to avoid direct state mutation
@@ -40,7 +39,8 @@ function GroupRegistration() {
         }
 
         try {
-            await axios.post(`${API_URL}/groups/register`, {
+            setLoading(true);
+            await API.post("/groups/register", {
                 group_name: groupName,
                 members: members,
             });
@@ -51,6 +51,8 @@ function GroupRegistration() {
             console.error("Full error object:", err);
             console.error("Error response:", err.response);
             setError(err.response?.data?.msg || "An error occurred during registration.");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -115,8 +117,12 @@ function GroupRegistration() {
                 {success && <div className="bg-green-500 text-white p-3 rounded text-center">{success}</div>}
 
                 <div className="text-center">
-                    <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition duration-300 text-lg">
-                        Register Group
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition duration-300 text-lg disabled:opacity-60"
+                    >
+                        {loading ? "Registering…" : "Register Group"}
                     </button>
                 </div>
             </form>
@@ -125,4 +131,3 @@ function GroupRegistration() {
 }
 
 export default GroupRegistration;
-

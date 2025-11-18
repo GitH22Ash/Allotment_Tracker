@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { API } from '../api'; // adjust path if your file structure differs
 
 function SupervisorDashboard() {
     const [groups, setGroups] = useState([]);
@@ -20,21 +20,20 @@ function SupervisorDashboard() {
             }
 
             try {
-                // Fetch groups - CORRECTED ENDPOINT
-                const res = await axios.get('http://localhost:5000/api/supervisors/my-groups', {
-                    headers: { 'x-auth-token': token }
-                });
-                setGroups(res.data);
-                
-                // Fetch preferences
-                const prefRes = await axios.get('http://localhost:5000/api/supervisors/preferences', {
-                    headers: { 'x-auth-token': token }
-                });
-                setMaxGroups(prefRes.data.max_groups);
+                setLoading(true);
+                // axios requests use API which attaches token via interceptor
+                const [groupsRes, prefRes] = await Promise.all([
+                    API.get('/supervisors/my-groups'),
+                    API.get('/supervisors/preferences')
+                ]);
+                setGroups(groupsRes.data || []);
+                setMaxGroups(prefRes.data?.max_groups ?? 5);
             } catch (err) {
-                console.error("Error fetching groups:", err);
+                console.error("Error fetching dashboard data:", err);
                 setError('Failed to load dashboard data. Please log in again.');
-                localStorage.removeItem('token'); // Clear bad token
+                localStorage.removeItem('token');
+                // optionally redirect to login after a short delay:
+                // setTimeout(() => navigate('/supervisor/login'), 1200);
             } finally {
                 setLoading(false);
             }
@@ -45,17 +44,23 @@ function SupervisorDashboard() {
 
     const handlePreferencesUpdate = async () => {
         const token = localStorage.getItem('token');
+        if (!token) {
+            setError('Please login again.');
+            navigate('/supervisor/login');
+            return;
+        }
+
         try {
-            await axios.put('http://localhost:5000/api/supervisors/preferences', 
-                { max_groups: maxGroups },
-                { headers: { 'x-auth-token': token } }
-            );
+            setLoading(true);
+            await API.put('/supervisors/preferences', { max_groups: maxGroups });
             setSuccess('Preferences updated successfully!');
             setShowPreferences(false);
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
             console.error('Failed to update preferences:', err);
-            setError('Failed to update preferences. Please try again.');
+            setError(err.response?.data?.msg || 'Failed to update preferences. Please try again.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -68,14 +73,9 @@ function SupervisorDashboard() {
         };
 
         try {
-            const token = localStorage.getItem('token');
-            await axios.put('http://localhost:5000/api/supervisors/marks', payload, {
-                headers: { 'x-auth-token': token }
-            });
-             // Clear any previous error on a successful update
+            await API.put('/supervisors/marks', payload);
             setError('');
         } catch (err) {
-            // FIX: Use the 'err' variable for debugging and set a user-friendly error state.
             console.error('Failed to update mark:', err);
             setError(`Failed to update mark for student ${student_reg_no}. Please refresh and try again.`);
         }
@@ -88,7 +88,7 @@ function SupervisorDashboard() {
     };
 
     if (loading) return <p className="text-center">Loading dashboard...</p>;
-    
+
     return (
         <div>
             <div className="flex justify-between items-center mb-6">
@@ -100,8 +100,7 @@ function SupervisorDashboard() {
                     Group Preferences
                 </button>
             </div>
-            
-            {/* Preferences Panel */}
+
             {showPreferences && (
                 <div className="bg-blue-50 p-6 rounded-lg shadow-md mb-6">
                     <h3 className="text-lg font-semibold mb-4">Set Maximum Groups</h3>
@@ -112,12 +111,13 @@ function SupervisorDashboard() {
                             min="1"
                             max="20"
                             value={maxGroups}
-                            onChange={(e) => setMaxGroups(parseInt(e.target.value))}
+                            onChange={(e) => setMaxGroups(parseInt(e.target.value) || 0)}
                             className="w-20 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                         />
                         <button
                             onClick={handlePreferencesUpdate}
                             className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition-colors"
+                            disabled={loading}
                         >
                             Update
                         </button>
@@ -133,8 +133,7 @@ function SupervisorDashboard() {
                     </p>
                 </div>
             )}
-            
-            {/* Display error message if it exists */}
+
             {error && <p className="text-center text-red-500 bg-red-100 p-3 rounded-md mb-4">{error}</p>}
             {success && <p className="text-center text-green-500 bg-green-100 p-3 rounded-md mb-4">{success}</p>}
 
@@ -172,7 +171,7 @@ function SupervisorDashboard() {
                                                         <input
                                                             type="number"
                                                             className="w-20 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                                            value={member[`review${reviewNumber}_marks`] || ''}
+                                                            value={member[`review${reviewNumber}_marks`] ?? ''}
                                                             onChange={(e) => handleInputChange(e, groupIndex, memberIndex, reviewNumber)}
                                                             onBlur={(e) => handleMarkUpdate(member.reg_no, group.group_id, reviewNumber, e.target.value)}
                                                         />
